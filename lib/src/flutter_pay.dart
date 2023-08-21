@@ -48,7 +48,7 @@ class FlutterPay {
   /// * [paymentItems] - affects only Apple Pay. See [PaymentItem]
   /// * [merchantName] - affects only Google Pay.
   /// Mercant name which will be displayed to customer.
-  Future<String> requestPayment({
+  String requestPayment({
     GoogleParameters? googleParameters,
     AppleParameters? appleParameters,
     List<PaymentNetwork> allowedPaymentNetworks = const [],
@@ -67,16 +67,10 @@ class FlutterPay {
       "emailRequired": emailRequired,
     };
 
-    if (Platform.isAndroid && googleParameters != null) {
-      params.addAll(googleParameters.toMap());
-    } else if (Platform.isIOS && appleParameters != null) {
-      params.addAll(appleParameters.toMap());
-    } else {
-      throw FlutterPayError(description: "");
-    }
+    var encodedParams = json.encode(params);
 
     try {
-      var response = await _channel.invokeMethod('requestPayment', params);
+      var response = await _channel.invokeMethod('requestPayment', encodedParams);
       var payResponse = Map<String, String>.from(response);
       if (payResponse == null) {
         throw FlutterPayError(description: "Pay response cannot be parsed");
@@ -102,4 +96,3 @@ class FlutterPay {
       throw FlutterPayError(code: error.code, description: error.message);
     }
   }
-}
